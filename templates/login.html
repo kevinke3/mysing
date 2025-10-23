@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Loket{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h1>Welcome Back</h1>
+                    <p>Sign in to your Loket account</p>
+                </div>
+                
+                <form method="POST" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                        <i class="fas fa-lock input-icon"></i>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-auth">Sign In</button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="{{ url_for('register') }}">Create one here</a></p>
+                </div>
+                
+                <div class="demo-account">
+                    <h3>Demo Account</h3>
+                    <p><strong>Email:</strong> admin@loket.org</p>
+                    <p><strong>Password:</strong> admin123</p>
+                </div>
+            </div>
+            
+            <div class="auth-hero">
+                <div class="hope-symbol">
+                    <i class="fas fa-dove"></i>
+                </div>
+                <h2>Together We Can Bring Hope</h2>
+                <p>Your login helps us reunite families and bring missing persons home safely.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

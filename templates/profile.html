@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Loket{% endblock %}
+
+{% block content %}
+<section class="profile-section">
+    <div class="container">
+        <div class="profile-header">
+            <h1>My Profile</h1>
+            <p>Manage your account and view your reports</p>
+        </div>
+        
+        <div class="profile-content">
+            <div class="profile-sidebar">
+                <div class="profile-card">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <h3>{{ current_user.name }}</h3>
+                    <p class="user-email">{{ current_user.email }}</p>
+                    <p class="user-role">{{ current_user.role|title }}</p>
+                    <p class="member-since">Member since {{ current_user.date_joined.strftime('%Y-%m-%d') }}</p>
+                </div>
+                
+                <div class="profile-stats">
+                    <div class="stat-item">
+                        <span class="stat-number">{{ user_reports|length }}</span>
+                        <span class="stat-label">Reports Filed</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="profile-main">
+                <div class="profile-section-card">
+                    <h3>My Reports</h3>
+                    {% if user_reports %}
+                        <div class="reports-list">
+                            {% for report in user_reports %}
+                            <div class="report-item">
+                                <div class="report-header">
+                                    <h4>{{ report.name }}</h4>
+                                    <span class="report-date">{{ report.date_reported.strftime('%Y-%m-%d') }}</span>
+                                </div>
+                                <div class="report-details">
+                                    <p><strong>Age:</strong> {{ report.age }} | <strong>Gender:</strong> {{ report.gender }}</p>
+                                    <p><strong>Last Seen:</strong> {{ report.last_seen }}</p>
+                                    <p><strong>Status:</strong> 
+                                        <span class="status-{{ 'found' if report.is_found else 'active' }}">
+                                            {{ 'Found' if report.is_found else 'Active' }}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div class="report-actions">
+                                    <a href="{{ url_for('case_details', person_id=report.id) }}" class="btn btn-outline btn-sm">View Details</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h4>No Reports Yet</h4>
+                            <p>You haven't filed any missing person reports yet.</p>
+                            <a href="{{ url_for('report_missing') }}" class="btn btn-primary">File Your First Report</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

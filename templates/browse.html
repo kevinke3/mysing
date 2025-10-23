@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Cases - Loket{% endblock %}
+
+{% block content %}
+<section class="browse-section">
+    <div class="container">
+        <div class="browse-header">
+            <h1>Browse Missing Persons Cases</h1>
+            <p>Search through our database of missing persons cases</p>
+        </div>
+        
+        <div class="search-filters">
+            <form method="GET" class="search-form">
+                <div class="search-container">
+                    <div class="search-box">
+                        <input type="text" name="q" id="searchInput" placeholder="Search by name or description..." value="{{ search_query }}">
+                        <button type="submit" id="searchBtn"><i class="fas fa-search"></i></button>
+                    </div>
+                    <select name="region" id="regionFilter">
+                        <option value="">All Regions</option>
+                        {% for region in regions %}
+                            <option value="{{ region }}" {% if region == selected_region %}selected{% endif %}>{{ region }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+        
+        <div class="search-results">
+            {% if missing_persons %}
+            <div class="cases-grid">
+                {% for person in missing_persons %}
+                <div class="case-card">
+                    <div class="case-image">
+                        <img src="{{ person.photo_url }}" alt="{{ person.name }}">
+                    </div>
+                    <div class="case-info">
+                        <h3>{{ person.name }}</h3>
+                        <p><strong>Age:</strong> {{ person.age }}</p>
+                        <p><strong>Last Seen:</strong> {{ person.last_seen }}</p>
+                        <p><strong>Date:</strong> {{ person.last_seen_date.strftime('%Y-%m-%d') }}</p>
+                        <p><strong>Reported by:</strong> {{ person.reporter.name }}</p>
+                        <a href="{{ url_for('case_details', person_id=person.id) }}" class="btn-case-details">View Details</a>
+                        {% if current_user.is_authenticated %}
+                        <button class="btn-report-sighting" data-person-id="{{ person.id }}">Report Sighting</button>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search"></i>
+                <h3>No Cases Found</h3>
+                <p>No missing persons cases match your search criteria.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Sighting Report Modal -->
+<div id="sightingModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Report a Sighting</h2>
+        <form id="sightingForm" method="POST">
+            <input type="hidden" id="sightingPersonId" name="person_id">
+            <div class="form-group">
+                <label for="sighting_location">Where did you see this person? *</label>
+                <input type="text" id="sighting_location" name="location" required>
+            </div>
+            <div class="form-group">
+                <label for="sighting_date">When did you see them? *</label>
+                <input type="datetime-local" id="sighting_date" name="sighting_date" required>
+            </div>
+            <div class="form-group">
+                <label for="sighting_details">Additional Details</label>
+                <textarea id="sighting_details" name="details" rows="4" placeholder="What were they wearing? Who were they with? Any other important details..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="reporter_name">Your Name *</label>
+                <input type="text" id="reporter_name" name="reporter_name" required value="{{ current_user.name if current_user.is_authenticated }}">
+            </div>
+            <div class="form-group">
+                <label for="reporter_contact">Your Contact Information *</label>
+                <input type="text" id="reporter_contact" name="reporter_contact" required 
+                       value="{{ current_user.phone if current_user.is_authenticated else '' }}" 
+                       placeholder="Phone or email">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Sighting Report</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sighting report modal
+    const sightingModal = document.getElementById('sightingModal');
+    const sightingForm = document.getElementById('sightingForm');
+    
+    document.querySelectorAll('.btn-report-sighting').forEach(button => {
+        button.addEventListener('click', function() {
+            const personId = this.getAttribute('data-person-id');
+            document.getElementById('sightingPersonId').value = personId;
+            sightingModal.style.display = 'block';
+        });
+    });
+    
+    document.querySelector('.close-modal').addEventListener('click', function() {
+        sightingModal.style.display = 'none';
+    });
+    
+    window.addEventListener('click', function(e) {
+        if (e.target === sightingModal) {
+            sightingModal.style.display = 'none';
+        }
+    });
+    
+    // Set action for sighting form
+    sightingForm.action = "{{ url_for('report_sighting', person_id=0) }}".replace('/0', '') + '/' + document.getElementById('sightingPersonId').value;
+});
+</script>
+{% endblock %}

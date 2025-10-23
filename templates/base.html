@@ -63,24 +63,110 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer -->
+        <!-- Footer -->
     <footer class="footer">
         <div class="container">
+            <!-- Emergency Numbers Section -->
+            <div class="emergency-section">
+                <h3>Emergency Contacts - Kenya</h3>
+                <div class="emergency-numbers">
+                    <div class="emergency-item">
+                        <div class="emergency-icon">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div class="emergency-info">
+                            <strong>Emergency Numbers</strong>
+                            <div class="numbers-grid">
+                                <span>999</span>
+                                <span>911</span>
+                                <span>112</span>
+                            </div>
+                            <small>All network-free from mobile phones</small>
+                        </div>
+                    </div>
+                    <div class="emergency-item">
+                        <div class="emergency-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="emergency-info">
+                            <strong>DCI Crime Reporting</strong>
+                            <div class="numbers-grid">
+                                <span>0800 722 203</span>
+                            </div>
+                            <small>24/7 Toll-free • Anonymous</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="emergency-note">
+                    <p><i class="fas fa-exclamation-triangle"></i> In case of emergency, contact police immediately</p>
+                </div>
+            </div>
+
+            <!-- Main Footer Content -->
             <div class="footer-content">
-                <div class="footer-logo">
-                    <i class="fas fa-search-heart"></i>
-                    <span>Loket</span>
+                <div class="footer-section">
+                    <div class="footer-logo">
+                        <i class="fas fa-search-heart"></i>
+                        <span>Loket</span>
+                    </div>
+                    <p class="footer-description">
+                        Bringing hope to families by connecting communities to help find missing persons and reunite loved ones.
+                    </p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    </div>
                 </div>
-                <div class="footer-links">
-                    <a href="{{ url_for('index') }}">Home</a>
-                    <a href="{{ url_for('browse') }}">Browse Cases</a>
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('report_missing') }}">Report Missing</a>
-                    {% endif %}
-                    <a href="{{ url_for('login') }}">Login</a>
+
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <div class="footer-links">
+                        <a href="{{ url_for('index') }}">Home</a>
+                        <a href="{{ url_for('browse') }}">Browse Cases</a>
+                        <a href="{{ url_for('report_missing') }}">Report Missing</a>
+                        <a href="{{ url_for('login') }}">Login</a>
+                        <a href="{{ url_for('register') }}">Register</a>
+                    </div>
                 </div>
+
+                <div class="footer-section">
+                    <h4>Resources</h4>
+                    <div class="footer-links">
+                        <a href="#">Safety Tips</a>
+                        <a href="#">Volunteer Guide</a>
+                        <a href="#">Family Support</a>
+                        <a href="#">FAQ</a>
+                        <a href="#">Privacy Policy</a>
+                    </div>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <span>support@loket.org</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <span>+254 700 123 456</span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Nairobi, Kenya</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
                 <div class="footer-copyright">
-                    <p>&copy; 2024 Loket. Bringing hope to families.</p>
+                    <p>&copy; 2024 Loket. Bringing hope to families across Kenya.</p>
+                </div>
+                <div class="footer-credits">
+                    <p>Supported by Community Volunteers</p>
                 </div>
             </div>
         </div>

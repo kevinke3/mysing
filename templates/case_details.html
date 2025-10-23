@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}{{ person.name }} - Case Details - Loket{% endblock %}
+
+{% block content %}
+<section class="case-details-section">
+    <div class="container">
+        <div class="case-details-header">
+            <a href="{{ url_for('browse') }}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Back to Browse
+            </a>
+            <h1>Case Details: {{ person.name }}</h1>
+        </div>
+        
+        <div class="case-details-content">
+            <div class="case-image-large">
+                <img src="{{ person.photo_url }}" alt="{{ person.name }}">
+            </div>
+            
+            <div class="case-info-detailed">
+                <div class="info-section">
+                    <h3>Personal Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Name:</strong>
+                            <span>{{ person.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Age:</strong>
+                            <span>{{ person.age }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Gender:</strong>
+                            <span>{{ person.gender }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Last Seen Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Location:</strong>
+                            <span>{{ person.last_seen }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Date:</strong>
+                            <span>{{ person.last_seen_date.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Region:</strong>
+                            <span>{{ person.region }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Physical Description</h3>
+                    <p>{{ person.description }}</p>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Contact Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Contact Person:</strong>
+                            <span>{{ person.contact_name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Phone:</strong>
+                            <span>{{ person.contact_phone }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Email:</strong>
+                            <span>{{ person.contact_email }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Case Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <strong>Reported by:</strong>
+                            <span>{{ person.reporter.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Date Reported:</strong>
+                            <span>{{ person.date_reported.strftime('%Y-%m-%d') }}</span>
+                        </div>
+                        <div class="info-item">
+                            <strong>Status:</strong>
+                            <span class="status-{{ 'found' if person.is_found else 'active' }}">
+                                {{ 'Found' if person.is_found else 'Active' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if current_user.is_authenticated %}
+                <div class="action-buttons">
+                    <button class="btn btn-primary btn-report-sighting" data-person-id="{{ person.id }}">
+                        Report Sighting
+                    </button>
+                </div>
+                {% else %}
+                <div class="login-prompt">
+                    <p><a href="{{ url_for('login') }}">Login</a> to report a sighting or get more information.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Sighting Report Modal -->
+<div id="sightingModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Report a Sighting</h2>
+        <form id="sightingForm" method="POST" action="{{ url_for('report_sighting', person_id=person.id) }}">
+            <div class="form-group">
+                <label for="sighting_location">Where did you see this person? *</label>
+                <input type="text" id="sighting_location" name="location" required>
+            </div>
+            <div class="form-group">
+                <label for="sighting_date">When did you see them? *</label>
+                <input type="datetime-local" id="sighting_date" name="sighting_date" required>
+            </div>
+            <div class="form-group">
+                <label for="sighting_details">Additional Details</label>
+                <textarea id="sighting_details" name="details" rows="4" placeholder="What were they wearing? Who were they with? Any other important details..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="reporter_name">Your Name *</label>
+                <input type="text" id="reporter_name" name="reporter_name" required value="{{ current_user.name }}">
+            </div>
+            <div class="form-group">
+                <label for="reporter_contact">Your Contact Information *</label>
+                <input type="text" id="reporter_contact" name="reporter_contact" required value="{{ current_user.phone }}" placeholder="Phone or email">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Sighting Report</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const sightingModal = document.getElementById('sightingModal');
+    const sightingForm = document.getElementById('sightingForm');
+    
+    document.querySelector('.btn-report-sighting').addEventListener('click', function() {
+        sightingModal.style.display = 'block';
+    });
+    
+    document.querySelector('.close-modal').addEventListener('click', function() {
+        sightingModal.style.display = 'none';
+    });
+    
+    window.addEventListener('click', function(e) {
+        if (e.target === sightingModal) {
+            sightingModal.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

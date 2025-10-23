@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">Bringing Loved Ones Home</h1>
+        <p class="hero-subtitle">Loket connects families, authorities, and volunteers to help find missing persons and reunite families.</p>
+        <div class="hero-buttons">
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('report_missing') }}" class="btn btn-primary">Report Missing Person</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-primary">Login to Report</a>
+            {% endif %}
+            <a href="{{ url_for('browse') }}" class="btn btn-secondary">Browse Cases</a>
+        </div>
+    </div>
+    <div class="hero-image">
+        <div class="hope-symbol">
+            <i class="fas fa-dove"></i>
+        </div>
+    </div>
+</section>
+
+<!-- Recent Cases Section -->
+<section class="recent-cases">
+    <div class="container">
+        <h2>Recent Missing Persons Cases</h2>
+        {% if missing_persons %}
+        <div class="cases-grid">
+            {% for person in missing_persons %}
+            <div class="case-card">
+                <div class="case-image">
+                    <img src="{{ person.photo_url }}" alt="{{ person.name }}">
+                </div>
+                <div class="case-info">
+                    <h3>{{ person.name }}</h3>
+                    <p><strong>Age:</strong> {{ person.age }}</p>
+                    <p><strong>Last Seen:</strong> {{ person.last_seen }}</p>
+                    <p><strong>Date:</strong> {{ person.last_seen_date.strftime('%Y-%m-%d') }}</p>
+                    <a href="{{ url_for('case_details', person_id=person.id) }}" class="btn-case-details">View Details</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-search"></i>
+            <h3>No Active Cases</h3>
+            <p>There are currently no active missing persons cases.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Found Persons Section -->
+<section class="found-persons">
+    <div class="container">
+        <h2>Recently Found & Reunited</h2>
+        {% if found_persons %}
+        <div class="found-grid">
+            {% for person in found_persons %}
+            <div class="found-card">
+                <div class="found-image">
+                    <img src="{{ person.photo_url }}" alt="{{ person.name }}">
+                    <div class="found-badge">Reunited</div>
+                </div>
+                <div class="found-info">
+                    <h3>{{ person.name }}</h3>
+                    <p><strong>Age:</strong> {{ person.age }}</p>
+                    <p><strong>Found Date:</strong> {{ person.found_date.strftime('%Y-%m-%d') }}</p>
+                    <p><strong>Reunited With:</strong> {{ person.reunited_with }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-heart"></i>
+            <h3>No Recent Reunions</h3>
+            <p>Check back later for success stories.</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

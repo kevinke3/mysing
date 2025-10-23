@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
+import os
 
 db = SQLAlchemy()
 
@@ -35,12 +36,18 @@ class MissingPerson(db.Model):
     contact_name = db.Column(db.String(100), nullable=False)
     contact_phone = db.Column(db.String(20), nullable=False)
     contact_email = db.Column(db.String(100), nullable=False)
-    photo_url = db.Column(db.String(200), default='/static/images/default-avatar.png')
+    photo_filename = db.Column(db.String(200), nullable=True)
     date_reported = db.Column(db.DateTime, default=datetime.utcnow)
     is_found = db.Column(db.Boolean, default=False)
     
     # Foreign key
     reported_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    @property
+    def photo_url(self):
+        if self.photo_filename:
+            return f'/static/uploads/{self.photo_filename}'
+        return '/static/images/default-avatar.png'
 
 class FoundPerson(db.Model):
     id = db.Column(db.Integer, primary_key=True)

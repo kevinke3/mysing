@@ -1926,3 +1926,153 @@ p {
         font-size: 1.5rem;
     }
 }
+
+/* Call Button Styles */
+.btn-call-report {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 15px 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 15px rgba(0, 119, 182, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-call-report:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 119, 182, 0.4);
+}
+
+.btn-call {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 12px 24px;
+    font-weight: 600;
+}
+
+.call-guidance-small {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--primary-light);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.call-guidance-small i {
+    color: var(--primary-color);
+    margin-right: 0.5rem;
+}
+
+/* Call Confirmation Modal */
+.call-confirmation {
+    text-align: center;
+    padding: 1rem;
+}
+
+.call-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--success-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-size: 2rem;
+    color: white;
+}
+
+.call-confirmation h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.call-details {
+    background: var(--light-gray);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin: 1.5rem 0;
+    text-align: left;
+}
+
+.call-details p {
+    margin-bottom: 0.5rem;
+}
+
+.call-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+    flex-wrap: wrap;
+}
+
+.call-guidance {
+    text-align: left;
+    background: var(--primary-light);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    margin-top: 1.5rem;
+}
+
+.call-guidance h4 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.call-guidance ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.call-guidance li {
+    margin-bottom: 0.5rem;
+    color: var(--dark-gray);
+}
+
+/* Case Actions in Browse Page */
+.case-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+}
+
+.case-actions .btn-case-details,
+.case-actions .btn-report-sighting {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+.case-actions .btn-report-sighting {
+    background: var(--success-color);
+    color: white;
+    border: none;
+}
+
+.case-actions .btn-report-sighting:hover {
+    background: #218838;
+    transform: translateY(-1px);
+}
+
+/* Responsive Call Buttons */
+@media (max-width: 768px) {
+    .case-actions {
+        flex-direction: column;
+    }
+    
+    .call-actions {
+        flex-direction: column;
+    }
+    
+    .call-actions .btn {
+        width: 100%;
+    }
+}

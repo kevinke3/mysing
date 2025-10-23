@@ -1,15 +1,27 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for, flash
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from models import db, User, MissingPerson, FoundPerson, SightingReport
 from datetime import datetime
 import os
+from werkzeug.utils import secure_filename
+from PIL import Image
+import uuid
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'loket-secret-key-2024'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///loket.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# File upload configuration
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+# Ensure upload directory exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+os.makedirs('static/images', exist_ok=True)
 
 # Initialize extensions
 db.init_app(app)
@@ -21,6 +33,38 @@ login_manager.login_message = 'Please log in to access this page.'
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def process_image(file, person_id):
+    """Process and save the uploaded image"""
+    if file and allowed_file(file.filename):
+        # Generate unique filename
+        file_ext = file.filename.rsplit('.', 1)[1].lower()
+        filename = f"missing_person_{person_id}_{uuid.uuid4().hex[:8]}.{file_ext}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        
+        # Open and process image
+        try:
+            image = Image.open(file.stream)
+            
+            # Convert to RGB if necessary
+            if image.mode in ('RGBA', 'P'):
+                image = image.convert('RGB')
+            
+            # Resize image to reasonable dimensions (max 800x800)
+            image.thumbnail((800, 800), Image.Resampling.LANCZOS)
+            
+            # Save processed image
+            image.save(filepath, 'JPEG', quality=85, optimize=True)
+            
+            return filename
+        except Exception as e:
+            print(f"Error processing image: {e}")
+            return None
+    return None
 
 # Create tables and sample data
 def init_db():
@@ -156,6 +200,7 @@ def browse():
 @login_required
 def report_missing():
     if request.method == 'POST':
+        # First create the missing person record to get an ID
         missing_person = MissingPerson(
             name=request.form.get('name'),
             age=request.form.get('age'),
@@ -171,6 +216,15 @@ def report_missing():
         )
         
         db.session.add(missing_person)
+        db.session.flush()  # This assigns an ID without committing
+        
+        # Handle file upload
+        file = request.files.get('photo')
+        if file and file.filename:
+            filename = process_image(file, missing_person.id)
+            if filename:
+                missing_person.photo_filename = filename
+        
         db.session.commit()
         
         flash('Missing person report submitted successfully!', 'success')
@@ -209,6 +263,11 @@ def profile():
 def case_details(person_id):
     missing_person = MissingPerson.query.get_or_404(person_id)
     return render_template('case_details.html', person=missing_person)
+
+# Serve uploaded files
+@app.route('/static/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # API endpoints for AJAX
 @app.route('/api/search')

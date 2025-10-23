@@ -40,11 +40,19 @@
                         <p><strong>Age:</strong> {{ person.age }}</p>
                         <p><strong>Last Seen:</strong> {{ person.last_seen }}</p>
                         <p><strong>Date:</strong> {{ person.last_seen_date.strftime('%Y-%m-%d') }}</p>
-                        <p><strong>Reported by:</strong> {{ person.reporter.name }}</p>
-                        <a href="{{ url_for('case_details', person_id=person.id) }}" class="btn-case-details">View Details</a>
-                        {% if current_user.is_authenticated %}
-                        <button class="btn-report-sighting" data-person-id="{{ person.id }}">Report Sighting</button>
-                        {% endif %}
+                        <p><strong>Contact:</strong> {{ person.contact_name }}</p>
+                        
+                        <div class="case-actions">
+                            <a href="{{ url_for('case_details', person_id=person.id) }}" class="btn-case-details">
+                                <i class="fas fa-info-circle"></i> View Details
+                            </a>
+                            {% if current_user.is_authenticated %}
+                            <a href="tel:{{ person.contact_phone|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}" 
+                               class="btn-report-sighting">
+                                <i class="fas fa-phone"></i> Call Reporter
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 {% endfor %}
@@ -60,37 +68,37 @@
     </div>
 </section>
 
-<!-- Sighting Report Modal -->
-<div id="sightingModal" class="modal">
+<!-- Simple Call Confirmation Modal -->
+<div id="callModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h2>Report a Sighting</h2>
-        <form id="sightingForm" method="POST">
-            <input type="hidden" id="sightingPersonId" name="person_id">
-            <div class="form-group">
-                <label for="sighting_location">Where did you see this person? *</label>
-                <input type="text" id="sighting_location" name="location" required>
+        <div class="call-confirmation">
+            <div class="call-icon">
+                <i class="fas fa-phone"></i>
             </div>
-            <div class="form-group">
-                <label for="sighting_date">When did you see them? *</label>
-                <input type="datetime-local" id="sighting_date" name="sighting_date" required>
+            <h3>Ready to Call</h3>
+            <p>You are about to call the contact person for this missing person case.</p>
+            <div class="call-details">
+                <p><strong>Contact:</strong> <span id="callContactName"></span></p>
+                <p><strong>Phone:</strong> <span id="callPhoneNumber"></span></p>
+                <p><strong>Regarding:</strong> <span id="callPersonName"></span></p>
             </div>
-            <div class="form-group">
-                <label for="sighting_details">Additional Details</label>
-                <textarea id="sighting_details" name="details" rows="4" placeholder="What were they wearing? Who were they with? Any other important details..."></textarea>
+            <div class="call-actions">
+                <a href="#" id="confirmCallBtn" class="btn btn-primary btn-call">
+                    <i class="fas fa-phone"></i> Call Now
+                </a>
+                <button class="btn btn-outline" id="cancelCallBtn">Cancel</button>
             </div>
-            <div class="form-group">
-                <label for="reporter_name">Your Name *</label>
-                <input type="text" id="reporter_name" name="reporter_name" required value="{{ current_user.name if current_user.is_authenticated }}">
+            <div class="call-guidance">
+                <h4>What to say when you call:</h4>
+                <ul>
+                    <li>Identify yourself and mention you're calling from Loket</li>
+                    <li>Describe where and when you saw the person</li>
+                    <li>Provide any important details about their appearance or situation</li>
+                    <li>Be prepared to share your contact information if needed</li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label for="reporter_contact">Your Contact Information *</label>
-                <input type="text" id="reporter_contact" name="reporter_contact" required 
-                       value="{{ current_user.phone if current_user.is_authenticated else '' }}" 
-                       placeholder="Phone or email">
-            </div>
-            <button type="submit" class="btn btn-primary">Submit Sighting Report</button>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -98,30 +106,70 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Sighting report modal
-    const sightingModal = document.getElementById('sightingModal');
-    const sightingForm = document.getElementById('sightingForm');
+    const callModal = document.getElementById('callModal');
+    const confirmCallBtn = document.getElementById('confirmCallBtn');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
+    const closeModal = document.querySelector('.close-modal');
     
+    // Add click event to all call buttons
     document.querySelectorAll('.btn-report-sighting').forEach(button => {
-        button.addEventListener('click', function() {
-            const personId = this.getAttribute('data-person-id');
-            document.getElementById('sightingPersonId').value = personId;
-            sightingModal.style.display = 'block';
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const caseCard = this.closest('.case-card');
+            const personName = caseCard.querySelector('h3').textContent;
+            const contactName = caseCard.querySelector('p:nth-child(5)').textContent.replace('Contact: ', '');
+            const phoneLink = this.getAttribute('href');
+            const phoneNumber = phoneLink.replace('tel:', '');
+            
+            // Format phone number for display
+            const formattedPhone = formatPhoneNumber(phoneNumber);
+            
+            // Update modal content
+            document.getElementById('callContactName').textContent = contactName;
+            document.getElementById('callPhoneNumber').textContent = formattedPhone;
+            document.getElementById('callPersonName').textContent = personName;
+            
+            // Update call link
+            confirmCallBtn.href = phoneLink;
+            
+            // Show modal
+            callModal.style.display = 'block';
         });
     });
     
-    document.querySelector('.close-modal').addEventListener('click', function() {
-        sightingModal.style.display = 'none';
+    // Close modal events
+    closeModal.addEventListener('click', function() {
+        callModal.style.display = 'none';
+    });
+    
+    cancelCallBtn.addEventListener('click', function() {
+        callModal.style.display = 'none';
     });
     
     window.addEventListener('click', function(e) {
-        if (e.target === sightingModal) {
-            sightingModal.style.display = 'none';
+        if (e.target === callModal) {
+            callModal.style.display = 'none';
         }
     });
     
-    // Set action for sighting form
-    sightingForm.action = "{{ url_for('report_sighting', person_id=0) }}".replace('/0', '') + '/' + document.getElementById('sightingPersonId').value;
+    // Phone number formatting function
+    function formatPhoneNumber(phoneNumber) {
+        // Remove all non-numeric characters
+        const cleaned = phoneNumber.replace(/\D/g, '');
+        
+        // Check if the number looks like a Kenyan number
+        if (cleaned.length === 10 && cleaned.startsWith('0')) {
+            return `+254 ${cleaned.substring(1, 4)} ${cleaned.substring(4, 7)} ${cleaned.substring(7)}`;
+        } else if (cleaned.length === 12 && cleaned.startsWith('254')) {
+            return `+${cleaned.substring(0, 3)} ${cleaned.substring(3, 6)} ${cleaned.substring(6, 9)} ${cleaned.substring(9)}`;
+        } else if (cleaned.length === 9) {
+            return `+254 ${cleaned.substring(0, 3)} ${cleaned.substring(3, 6)} ${cleaned.substring(6)}`;
+        }
+        
+        // Default formatting for other numbers
+        return phoneNumber;
+    }
 });
 </script>
 {% endblock %}

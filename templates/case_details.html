@@ -68,7 +68,7 @@
                         </div>
                         <div class="info-item">
                             <strong>Phone:</strong>
-                            <span>{{ person.contact_phone }}</span>
+                            <span id="contactPhone">{{ person.contact_phone }}</span>
                         </div>
                         <div class="info-item">
                             <strong>Email:</strong>
@@ -97,15 +97,20 @@
                     </div>
                 </div>
                 
-                {% if current_user.is_authenticated %}
+                {% if current_user.is_authenticated and not person.is_found %}
                 <div class="action-buttons">
-                    <button class="btn btn-primary btn-report-sighting" data-person-id="{{ person.id }}">
-                        Report Sighting
-                    </button>
+                    <a href="tel:{{ person.contact_phone|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}" 
+                       class="btn btn-primary btn-call-report" id="callReporterBtn">
+                        <i class="fas fa-phone"></i> Call Reporter to Report Sighting
+                    </a>
+                    <p class="call-guidance-small">
+                        <i class="fas fa-info-circle"></i>
+                        When you call, describe where and when you saw {{ person.name }}
+                    </p>
                 </div>
-                {% else %}
+                {% elif not current_user.is_authenticated %}
                 <div class="login-prompt">
-                    <p><a href="{{ url_for('login') }}">Login</a> to report a sighting or get more information.</p>
+                    <p><a href="{{ url_for('login') }}">Login</a> to contact the reporter about sightings.</p>
                 </div>
                 {% endif %}
             </div>
@@ -113,34 +118,39 @@
     </div>
 </section>
 
-<!-- Sighting Report Modal -->
-<div id="sightingModal" class="modal">
+<!-- Call Confirmation Modal -->
+<div id="callModal" class="modal">
     <div class="modal-content">
         <span class="close-modal">&times;</span>
-        <h2>Report a Sighting</h2>
-        <form id="sightingForm" method="POST" action="{{ url_for('report_sighting', person_id=person.id) }}">
-            <div class="form-group">
-                <label for="sighting_location">Where did you see this person? *</label>
-                <input type="text" id="sighting_location" name="location" required>
+        <div class="call-confirmation">
+            <div class="call-icon">
+                <i class="fas fa-phone"></i>
             </div>
-            <div class="form-group">
-                <label for="sighting_date">When did you see them? *</label>
-                <input type="datetime-local" id="sighting_date" name="sighting_date" required>
+            <h3>Ready to Call</h3>
+            <p>You are about to call the contact person for this missing person case.</p>
+            <div class="call-details">
+                <p><strong>Contact:</strong> {{ person.contact_name }}</p>
+                <p><strong>Phone:</strong> <span id="displayPhone">{{ person.contact_phone }}</span></p>
+                <p><strong>Regarding:</strong> {{ person.name }}</p>
             </div>
-            <div class="form-group">
-                <label for="sighting_details">Additional Details</label>
-                <textarea id="sighting_details" name="details" rows="4" placeholder="What were they wearing? Who were they with? Any other important details..."></textarea>
+            <div class="call-actions">
+                <a href="tel:{{ person.contact_phone|replace('(', '')|replace(')', '')|replace(' ', '')|replace('-', '') }}" 
+                   class="btn btn-primary btn-call">
+                    <i class="fas fa-phone"></i> Call Now
+                </a>
+                <button class="btn btn-outline" id="cancelCallBtn">Cancel</button>
             </div>
-            <div class="form-group">
-                <label for="reporter_name">Your Name *</label>
-                <input type="text" id="reporter_name" name="reporter_name" required value="{{ current_user.name }}">
+            <div class="call-guidance">
+                <h4>What to say when you call:</h4>
+                <ul>
+                    <li>"Hello, I'm calling from Loket about {{ person.name }}"</li>
+                    <li>Describe where and when you saw the person</li>
+                    <li>Mention what they were wearing or any distinctive features</li>
+                    <li>Provide your name and contact information if comfortable</li>
+                    <li>Be clear and calm in your description</li>
+                </ul>
             </div>
-            <div class="form-group">
-                <label for="reporter_contact">Your Contact Information *</label>
-                <input type="text" id="reporter_contact" name="reporter_contact" required value="{{ current_user.phone }}" placeholder="Phone or email">
-            </div>
-            <button type="submit" class="btn btn-primary">Submit Sighting Report</button>
-        </form>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -148,20 +158,32 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const sightingModal = document.getElementById('sightingModal');
-    const sightingForm = document.getElementById('sightingForm');
+    const callModal = document.getElementById('callModal');
+    const callReporterBtn = document.getElementById('callReporterBtn');
+    const closeModal = document.querySelector('.close-modal');
+    const cancelCallBtn = document.getElementById('cancelCallBtn');
     
-    document.querySelector('.btn-report-sighting').addEventListener('click', function() {
-        sightingModal.style.display = 'block';
+    if (callReporterBtn) {
+        callReporterBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            callModal.style.display = 'block';
+        });
+    }
+    
+    // Close modal events
+    closeModal.addEventListener('click', function() {
+        callModal.style.display = 'none';
     });
     
-    document.querySelector('.close-modal').addEventListener('click', function() {
-        sightingModal.style.display = 'none';
-    });
+    if (cancelCallBtn) {
+        cancelCallBtn.addEventListener('click', function() {
+            callModal.style.display = 'none';
+        });
+    }
     
     window.addEventListener('click', function(e) {
-        if (e.target === sightingModal) {
-            sightingModal.style.display = 'none';
+        if (e.target === callModal) {
+            callModal.style.display = 'none';
         }
     });
 });

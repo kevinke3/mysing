@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Login - Mysing{% endblock %}
+{% block title %}Login - Loket{% endblock %}
 
 {% block content %}
 <section class="auth-section">
@@ -9,8 +9,24 @@
             <div class="auth-card">
                 <div class="auth-header">
                     <h1>Welcome Back</h1>
-                    <p>Sign in to your Mysing account</p>
+                    <p>Sign in to your Loket account</p>
                 </div>
+                
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="flash-message {{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% if error %}
+                <div class="error-message">
+                    {{ error }}
+                </div>
+                {% endif %}
                 
                 <form method="POST" class="auth-form">
                     <div class="form-group">
@@ -23,6 +39,13 @@
                         <label for="password">Password</label>
                         <input type="password" id="password" name="password" required>
                         <i class="fas fa-lock input-icon"></i>
+                    </div>
+                    
+                    <!-- Forgot Password Link -->
+                    <div class="form-options">
+                        <a href="{{ url_for('forgot_password') }}" class="forgot-password">
+                            <i class="fas fa-key"></i> Forgot your password?
+                        </a>
                     </div>
                     
                     <button type="submit" class="btn btn-primary btn-auth">Sign In</button>

@@ -1,8 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
+import secrets
 
 db = SQLAlchemy()
 
@@ -17,6 +18,7 @@ class User(UserMixin, db.Model):
     
     # Relationships
     missing_persons = db.relationship('MissingPerson', backref='reporter', lazy=True)
+    reset_tokens = db.relationship('PasswordResetToken', backref='user', lazy=True)
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -68,7 +70,33 @@ class SightingReport(db.Model):
     reporter_contact = db.Column(db.String(100), nullable=False)
     date_reported = db.Column(db.DateTime, default=datetime.utcnow)
     reported_by = db.Column(db.Integer, db.ForeignKey('user.id'))
+    status = db.Column(db.String(20), default='pending')  # pending, reviewed, contacted, invalid
     
-    # Relationships
+    # Relationships - FIXED: removed duplicate backref
     missing_person = db.relationship('MissingPerson', backref='sightings', lazy=True)
-    user = db.relationship('User', backref='sighting_reports', lazy=True)
+
+class PasswordResetToken(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    token = db.Column(db.String(100), unique=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    used = db.Column(db.Boolean, default=False)
+    
+    def is_valid(self):
+        return (not self.used) and (datetime.utcnow() < self.expires_at)
+    
+    @staticmethod
+    def generate_token(user_id):
+        # Delete any existing tokens for this user
+        PasswordResetToken.query.filter_by(user_id=user_id).delete()
+        
+        # Create new token
+        token = PasswordResetToken(
+            user_id=user_id,
+            token=secrets.token_urlsafe(32),
+            expires_at=datetime.utcnow() + timedelta(hours=1)
+        )
+        db.session.add(token)
+        db.session.commit()
+        return token

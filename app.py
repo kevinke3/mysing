@@ -176,7 +176,7 @@ def send_password_reset_email(recipient_email, reset_url, user_name):
             <div class="container">
                 <div class="header">
                     <div style="font-size: 48px; margin-bottom: 10px;">🔍</div>
-                    <h1>Loket</h1>
+                    <h1>mysing</h1>
                     <p>Missing Persons Identification & Recovery</p>
                 </div>
                 <div class="content">
@@ -201,7 +201,7 @@ def send_password_reset_email(recipient_email, reset_url, user_name):
                     </p>
                     
                     <div class="footer">
-                        <div class="logo">Loket</div>
+                        <div class="logo">Mysing</div>
                         <p>Bringing hope to families • Reuniting loved ones</p>
                         <p>If you need help, reply to this email or contact support</p>
                     </div>
@@ -227,7 +227,7 @@ def send_password_reset_email(recipient_email, reset_url, user_name):
         
         Thank you for helping us reunite families,
         
-        The Loket Team
+        The mysing Team
         Bringing hope to families • Reuniting loved ones
         """
         
